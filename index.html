@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Actividad Interactiva · Introducción a la Investigación Social · UFRO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;1,8..60,300&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--navy:#0b1a33;--navy-mid:#0f2142;--gold:#c9a256;--gold-l:#e8d5a0;--cream:#f8f5ef;}
+html,body{height:100%;width:100%}
+body{font-family:'Source Serif 4',Georgia,serif;background:var(--navy);color:var(--cream);overflow-x:hidden;}
+.bg{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 80% 60% at 20% 10%,#1a3460 0%,transparent 60%),radial-gradient(ellipse 60% 80% at 80% 90%,#0d1f3a 0%,transparent 60%),linear-gradient(160deg,#0b1a33 0%,#0d2040 50%,#0b1530 100%);}
+.bg-grid{position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(201,162,86,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(201,162,86,.04) 1px,transparent 1px);background-size:60px 60px;}
+.bg-orb1{position:fixed;top:-120px;right:-120px;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(201,162,86,.08) 0%,transparent 70%);pointer-events:none;z-index:0;}
+.bg-orb2{position:fixed;bottom:-150px;left:-100px;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(26,52,96,.5) 0%,transparent 70%);pointer-events:none;z-index:0;}
+.page{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1.5rem;}
+.card{width:100%;max-width:640px;background:rgba(15,33,66,.6);border:.5px solid rgba(201,162,86,.2);border-radius:20px;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);padding:3rem 2.75rem;box-shadow:0 0 0 .5px rgba(201,162,86,.08),0 32px 80px rgba(0,0,0,.5),inset 0 1px 0 rgba(201,162,86,.12);animation:fadeUp .8s cubic-bezier(.16,1,.3,1) both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+.inst{display:flex;align-items:center;gap:.75rem;margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:.5px solid rgba(201,162,86,.15);animation:fadeUp .8s .1s cubic-bezier(.16,1,.3,1) both;}
+.inst-seal{width:42px;height:42px;flex-shrink:0;border:.5px solid rgba(201,162,86,.3);border-radius:10px;background:rgba(201,162,86,.08);display:flex;align-items:center;justify-content:center;}
+.inst-seal svg{width:22px;height:22px;opacity:.85}
+.inst-name{font-size:11px;font-weight:400;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;line-height:1.3}
+.inst-dept{font-size:11px;color:rgba(248,245,239,.45);letter-spacing:.04em;margin-top:1px}
+.kicker{font-size:11px;font-weight:400;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:.75rem;display:flex;align-items:center;gap:.5rem;animation:fadeUp .8s .18s cubic-bezier(.16,1,.3,1) both;}
+.kicker::before{content:'';width:24px;height:1px;background:var(--gold);opacity:.6}
+.title{font-family:'Playfair Display',Georgia,serif;font-size:clamp(22px,4.5vw,34px);font-weight:700;line-height:1.2;color:#fff;margin-bottom:1rem;animation:fadeUp .8s .24s cubic-bezier(.16,1,.3,1) both;}
+.title em{font-style:italic;color:var(--gold-l)}
+.subtitle{font-size:15px;font-weight:300;line-height:1.7;color:rgba(248,245,239,.6);margin-bottom:2rem;animation:fadeUp .8s .3s cubic-bezier(.16,1,.3,1) both;}
+.sections{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:2.25rem;animation:fadeUp .8s .36s cubic-bezier(.16,1,.3,1) both;}
+.sec-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:11px;letter-spacing:.03em;border:.5px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:rgba(248,245,239,.65);font-family:'Source Serif 4',Georgia,serif;}
+.sec-pill span{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.divider{height:.5px;background:linear-gradient(90deg,transparent,rgba(201,162,86,.3),transparent);margin-bottom:2rem;animation:fadeUp .8s .4s cubic-bezier(.16,1,.3,1) both;}
+.meta{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-bottom:2.25rem;animation:fadeUp .8s .44s cubic-bezier(.16,1,.3,1) both;}
+.meta-item{background:rgba(255,255,255,.04);border:.5px solid rgba(255,255,255,.08);border-radius:10px;padding:.75rem .6rem;text-align:center;}
+.meta-val{font-family:'Playfair Display',Georgia,serif;font-size:22px;font-weight:700;color:#fff;margin-bottom:2px;}
+.meta-lbl{font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:rgba(248,245,239,.4);line-height:1.3;}
+.cta-wrap{animation:fadeUp .8s .5s cubic-bezier(.16,1,.3,1) both;}
+.cta{display:flex;align-items:center;justify-content:center;gap:.75rem;width:100%;padding:1.1rem 2rem;background:linear-gradient(135deg,var(--gold) 0%,#a8842a 100%);color:var(--navy);border:none;border-radius:12px;font-family:'Playfair Display',Georgia,serif;font-size:16px;font-weight:700;letter-spacing:.02em;cursor:pointer;text-decoration:none;transition:all .25s cubic-bezier(.16,1,.3,1);box-shadow:0 8px 32px rgba(201,162,86,.25),0 2px 8px rgba(0,0,0,.3);position:relative;overflow:hidden;}
+.cta::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.15) 0%,transparent 60%);opacity:0;transition:opacity .25s;}
+.cta:hover{transform:translateY(-2px);box-shadow:0 16px 48px rgba(201,162,86,.35),0 4px 12px rgba(0,0,0,.4);}
+.cta:hover::before{opacity:1}
+.cta:active{transform:translateY(0)}
+.cta-arrow{width:22px;height:22px;border-radius:50%;background:rgba(11,26,51,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .25s;}
+.cta:hover .cta-arrow{transform:translateX(4px)}
+.footnote{margin-top:1.5rem;text-align:center;font-size:11px;color:rgba(248,245,239,.25);letter-spacing:.04em;animation:fadeUp .8s .58s cubic-bezier(.16,1,.3,1) both;}
+.credit{margin-top:2.5rem;font-size:11px;color:rgba(248,245,239,.2);letter-spacing:.05em;text-align:center;animation:fadeUp .8s .65s cubic-bezier(.16,1,.3,1) both;}
+@media(max-width:480px){.card{padding:2rem 1.5rem}.meta-val{font-size:18px}}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="bg-grid"></div>
+<div class="bg-orb1"></div>
+<div class="bg-orb2"></div>
+<div class="page">
+  <div class="card">
+    <div class="inst">
+      <div class="inst-seal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#c9a256" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3L2 8l10 5 10-5-10-5z"/>
+          <path d="M2 17l10 5 10-5"/>
+          <path d="M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+      <div>
+        <div class="inst-name">Universidad de La Frontera · Temuco, Chile</div>
+        <div class="inst-dept">Bachillerato en Ciencias Sociales</div>
+      </div>
+    </div>
+    <div class="kicker">Actividad interactiva</div>
+    <h1 class="title">Producción del conocimiento,<br>comunidades científicas<br>y <em>representaciones sociocientíficas</em></h1>
+    <p class="subtitle">Basada en Ragin (2007) <em>La construcción de la investigación social</em> y material del curso de Introducción a la Investigación Social.</p>
+    <div class="sections">
+      <span class="sec-pill"><span style="background:#1a4a7a"></span>C1 · Comunidades académicas</span>
+      <span class="sec-pill"><span style="background:#7a3b1e"></span>C2 · Accountability científica</span>
+      <span class="sec-pill"><span style="background:#1e3a5f"></span>C3 · Relevancia social</span>
+      <span class="sec-pill"><span style="background:#1a5c38"></span>C4 · Teoría social</span>
+      <span class="sec-pill"><span style="background:#7b3f00"></span>C5 · Evidencia empírica</span>
+      <span class="sec-pill"><span style="background:#4a1a6b"></span>C6 · Análisis sistemático</span>
+    </div>
+    <div class="divider"></div>
+    <div class="meta">
+      <div class="meta-item">
+        <div class="meta-val">6</div>
+        <div class="meta-lbl">Secciones temáticas</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-val">96</div>
+        <div class="meta-lbl">Puntos en total</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-val">~30'</div>
+        <div class="meta-lbl">Tiempo estimado</div>
+      </div>
+    </div>
+    <div class="cta-wrap">
+      <a class="cta" href="actividad_bcs_investigacion_social.html">
+        Iniciar actividad
+        <span class="cta-arrow">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M2.5 6h7M6.5 3l3 3-3 3" stroke="#0b1a33" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+      </a>
+    </div>
+    <p class="footnote">Modalidad individual o grupal · Compatible con dispositivos móviles</p>
+  </div>
+  <div class="credit">Introducción a la Investigación Social · UFRO · 2025</div>
+</div>
+</body>
+</html>
