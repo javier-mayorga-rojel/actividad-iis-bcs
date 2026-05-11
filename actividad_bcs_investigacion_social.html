@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Actividad Interactiva · Introducción a la Investigación Social · UFRO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+/*
+=================================================================
+  ACTIVIDAD INTERACTIVA — INTRODUCCIÓN A LA INVESTIGACIÓN SOCIAL
+  Bachillerato en Ciencias Sociales · Universidad de La Frontera
+=================================================================
+  PIN DEL DOCENTE: IIS2025
+  PUNTAJE MÁXIMO: 96 puntos (6 secciones × 16 puntos)
+  POR SECCIÓN: 6 SM + 6 VF + 4 Fragmentos = 16 puntos
+
+  INSTRUCCIONES FIREBASE (seguimiento entre dispositivos):
+  1. Ve a https://console.firebase.google.com
+  2. Crea un proyecto (ej: iis-bcs-ufro)
+  3. Compilación → Realtime Database → Crear → Modo de prueba
+  4. Configuración del proyecto → "</>" → copia firebaseConfig
+  5. Pega los valores en la sección CONFIGURACIÓN FIREBASE abajo
+  Sin Firebase, los datos se guardan localmente en el navegador.
+=================================================================
+*/
+:root{
+  --bg:#fafaf8;--bg2:#f0eeea;--bg3:#dddad3;
+  --text:#1a1a2e;--text2:#6b6b7a;--text3:#9b9baa;
+  --bdr:rgba(0,0,0,.1);--bdr2:rgba(0,0,0,.22);
+  --r:8px;--rl:12px;
+  --danger:#b91c1c;--ok:#15803d;
+  --navy:#0f2142;--gold:#c9a256;--gold-l:#e8d5a0;
+  --ff:'Source Serif 4',Georgia,serif;
+  --ff-d:'Playfair Display',Georgia,serif;
+}
+@media(prefers-color-scheme:dark){
+  :root{--bg:#18182a;--bg2:#232335;--bg3:#2e2e40;--text:#f0f0fa;--text2:#aaaacc;--text3:#6666aa;
+  --bdr:rgba(255,255,255,.1);--bdr2:rgba(255,255,255,.22);--danger:#f87171;--ok:#4ade80;}
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--ff);background:var(--bg);color:var(--text);font-size:14px;line-height:1.65}
+#app{max-width:700px;margin:0 auto;padding:0 0 5rem}
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--r);border:.5px solid var(--bdr2);background:transparent;cursor:pointer;font-size:14px;color:var(--text);font-family:var(--ff);transition:background .15s}
+.btn:hover{background:var(--bg2)}
+.btn-p{background:var(--navy);color:#fff;border-color:var(--navy)}.btn-p:hover{background:#162d4a}
+.btn-g{background:#1a5c38;color:#fff;border-color:#1a5c38}.btn-g:hover{background:#134a2c}
+/* Cards & layout */
+.card{background:var(--bg);border:.5px solid var(--bdr);border-radius:var(--rl);padding:1rem 1.25rem;margin-bottom:1rem}
+.inner{padding:1.25rem 1.25rem 0}
+.pbar{height:4px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-bottom:.75rem}
+.pfill{height:100%;border-radius:3px;transition:width .4s}
+/* Options */
+.opt{display:block;width:100%;text-align:left;padding:10px 14px;margin:4px 0;border-radius:var(--r);border:.5px solid var(--bdr);background:var(--bg);cursor:pointer;font-size:14px;color:var(--text);font-family:var(--ff);transition:all .15s}
+.opt:hover{border-color:var(--bdr2);background:var(--bg2)}
+.opt.sel{border-color:var(--navy);background:#eaf0f8;color:var(--navy);font-weight:500}
+/* TF buttons */
+.tfb{display:inline-flex;align-items:center;gap:5px;padding:7px 16px;border-radius:var(--r);border:.5px solid var(--bdr);background:var(--bg);cursor:pointer;font-size:13px;color:var(--text);font-family:var(--ff);transition:all .15s;margin-right:6px;margin-bottom:4px}
+.tfb:hover{background:var(--bg2)}
+.tfb.vs{border-color:#1a5c38;background:#ebf7ef;color:#1a5c38;font-weight:500}
+.tfb.fs{border-color:#9b2226;background:#fff0f0;color:#9b2226;font-weight:500}
+/* Word cloud */
+.wchip{display:inline-flex;align-items:center;padding:5px 13px;border-radius:20px;border:.5px solid var(--bdr);background:var(--bg2);cursor:pointer;margin:4px;transition:all .15s;color:var(--text)}
+.wchip.ws{color:#fff}
+/* Dashboard metrics */
+.metric{background:var(--bg2);border-radius:var(--r);padding:1rem;text-align:center}
+.mlabel{font-size:12px;color:var(--text2);margin-bottom:4px}
+.mval{font-size:24px;font-weight:500}
+/* Typography */
+h1{font-family:var(--ff-d);font-size:22px;font-weight:600;margin-bottom:.5rem;color:var(--text)}
+h2{font-family:var(--ff-d);font-size:18px;font-weight:600;margin-bottom:.75rem;color:var(--text)}
+h3{font-size:15px;font-weight:600;margin-bottom:.5rem;color:var(--text)}
+p{font-size:14px;line-height:1.65;color:var(--text2)}
+/* Inputs */
+input[type=text],input[type=password]{width:100%;padding:9px 12px;border-radius:var(--r);border:.5px solid var(--bdr2);background:var(--bg);color:var(--text);font-size:14px;font-family:var(--ff)}
+input:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 2px #0f214215}
+/* Radio */
+.radio-row{display:flex;gap:1.5rem;flex-wrap:wrap;margin-top:.5rem}
+.radio-row label{display:flex;align-items:center;gap:6px;cursor:pointer;font-size:14px;color:var(--text)}
+/* Info & feedback boxes */
+.info-box{background:#fffbeb;border:1px solid #fbbf24;border-radius:var(--rl);padding:1rem 1.25rem;margin-bottom:1.25rem}
+.feedback-box{background:#eff6ff;border:.5px solid #93c5fd;border-radius:8px;padding:.7rem 1rem;margin-top:.6rem;font-size:12px;color:#1d4ed8;line-height:1.55;display:flex;gap:.6rem;align-items:flex-start}
+
+/* ── HOME PAGE HERO ── */
+.hero{background:linear-gradient(145deg,#0b1a33 0%,#0f2142 40%,#162d4e 100%);padding:2rem 1.5rem 1.75rem;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-80px;right:-80px;width:280px;height:280px;border:1px solid rgba(201,162,86,.12);border-radius:50%;pointer-events:none}
+.hero::after{content:'';position:absolute;bottom:-100px;left:-60px;width:320px;height:320px;border:1px solid rgba(201,162,86,.07);border-radius:50%;pointer-events:none}
+.hero-badge{display:inline-flex;align-items:center;gap:.5rem;background:rgba(201,162,86,.12);border:.5px solid rgba(201,162,86,.3);border-radius:20px;padding:4px 12px;margin-bottom:1.25rem}
+.hero-badge span{font-size:10px;color:#c9a256;letter-spacing:.1em;text-transform:uppercase;font-weight:600}
+.hero-kicker{font-size:11px;color:rgba(201,162,86,.85);letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin-bottom:.4rem}
+.hero-title{font-family:var(--ff-d);font-size:clamp(20px,4.5vw,30px);color:#fff;font-weight:600;line-height:1.25;margin-bottom:.65rem}
+.hero-sub{font-size:13px;color:rgba(255,255,255,.55);line-height:1.6;margin-bottom:1.4rem}
+.hero-pills{display:flex;gap:.4rem;flex-wrap:wrap}
+.hero-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:20px;font-size:11px;color:#fff;letter-spacing:.02em}
+
+/* Section overview cards */
+.sec-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1.25rem}
+.sec-card{padding:.75rem;border-radius:10px;border:.5px solid;cursor:default}
+.sec-num{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;color:#fff;font-weight:700;margin-bottom:.4rem}
+.sec-title{font-size:12px;font-weight:600;line-height:1.3;margin-bottom:.25rem}
+.sec-meta{font-size:11px;line-height:1.3}
+
+/* CTA buttons */
+.cta-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1.75rem}
+.cta-card{display:flex;flex-direction:column;align-items:center;gap:.5rem;padding:1.25rem 1rem;border-radius:12px;cursor:pointer;font-family:var(--ff);border:none;transition:all .2s}
+
+/* Review enhancements */
+.rev-summary{border-radius:10px;padding:.85rem 1.1rem;margin-bottom:1.25rem}
+
+@media(max-width:480px){
+  .tfb{padding:6px 10px;font-size:12px}
+  .sec-grid{grid-template-columns:1fr}
+  .cta-grid{grid-template-columns:1fr}
+  .hero{padding:1.5rem 1.1rem 1.5rem}
+}
+</style>
+</head>
+<body>
+<div id="app"><div style="text-align:center;padding:3rem;color:var(--text2)"><p>Cargando actividad…</p></div></div>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+// ═══════════════════════════════════════════════════════
+//  CONFIGURACIÓN FIREBASE — REEMPLAZAR CON TUS VALORES
+// ═══════════════════════════════════════════════════════
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBkqtO2RSqeHeZdA1DGLFsusZYLu_uWm_4",
+  authDomain: "iis-bcs-ufro.firebaseapp.com",
+  databaseURL: "https://iis-bcs-ufro-default-rtdb.firebaseio.com",
+  projectId: "iis-bcs-ufro",
+  storageBucket: "iis-bcs-ufro.firebasestorage.app",
+  messagingSenderId: "890778805311",
+  appId: "1:890778805311:web:ec4c450674866dc6a3848a"
+};
+const PIN = "IIS2025";
+// ═══════════════════════════════════════════════════════
+
+const FB_OK = !FIREBASE_CONFIG.apiKey.includes("REEMPLAZAR");
+let DB = null;
+if(FB_OK){try{if(typeof firebase!=="undefined"){firebase.initializeApp(FIREBASE_CONFIG);DB=firebase.database();}else{console.warn("SDK Firebase no cargó. Usando modo local.");}}catch(e){console.error("Firebase error:",e);}}
+
+async function saveGrp(g){if(DB){await DB.ref("grupos/"+g.id).set(g);return;}localStorage.setItem("iis_"+g.id,JSON.stringify(g));}
+async function loadGrps(){if(DB){const s=await DB.ref("grupos").once("value");const d=s.val();return d?Object.values(d):[];}const gs=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k?.startsWith("iis_"))try{gs.push(JSON.parse(localStorage.getItem(k)));}catch{}}return gs;}
+function watchGrps(cb){if(!DB)return()=>{};const ref=DB.ref("grupos");ref.on("value",s=>{const d=s.val();cb(d?Object.values(d):[]); });return()=>ref.off("value");}
+
+// ─── DATOS DE LA ACTIVIDAD ───────────────────────────────────────────────────
+const CHARS = [
+
+// ╔═══════════════════════════════════════════════════════════╗
+// ║  SECCIÓN 1 — COMUNIDADES ACADÉMICAS Y PRODUCCIÓN         ║
+// ║              DEL CONOCIMIENTO                             ║
+// ╚═══════════════════════════════════════════════════════════╝
+{
+"id":0,"num":1,
+"color":"#1a4a7a","bg":"#e8f0f8","mid":"#2463a8",
+"title":"Comunidades académicas y producción del conocimiento",
+"desc":"Las comunidades científicas son colectivos que producen conocimiento de manera organizada, orientados por supuestos ontológicos, epistemológicos y paradigmáticos compartidos, y que cumplen funciones específicas para mantener activo el campo.",
+"words":["Ontología","Epistemología","Paradigma","Comunidad","Normas","Autonomía","Ethos","Funciones","Supuestos","Conocimiento"],
+"mc":[
+{"q":"¿Cuáles son los tres supuestos fundamentales que articulan la producción del conocimiento en las ciencias sociales?",
+"opts":["Empírico, teórico y metodológico","Ontológico, epistemológico y paradigmático","Deductivo, inductivo y abductivo","Social, cultural e histórico"],
+"ans":1,
+"tip":"La producción del conocimiento en ciencias sociales descansa en tres supuestos articulados: el ontológico (¿qué es la realidad social?), el epistemológico (¿cómo podemos conocerla?) y el paradigmático (¿qué cosmovisión orienta la investigación?). Estos supuestos se traducen luego en aspectos teóricos y metodológicos concretos."},
+{"q":"¿Cuántas funciones cumplen las comunidades científicas según el material de clases?",
+"opts":["Dos funciones básicas","Tres funciones especializadas","Cuatro funciones principales","Cinco funciones interdependientes"],
+"ans":2,
+"tip":"Según el material, la comunidad científica cumple cuatro funciones: (1) coordinadora, (2) estabilizadora, (3) integradora y (4) organizadora. Cada una garantiza el funcionamiento colectivo del campo."},
+{"q":"¿Qué describe la función integradora de una comunidad académica?",
+"opts":["La orientación de los temas prioritarios de investigación del campo","La acción de inserción y reconocimiento de nuevos miembros en la comunidad","La generación de normas que regulan el trabajo científico del campo","La coordinación de esfuerzos entre distintos grupos de investigadores"],
+"ans":1,
+"tip":"La función integradora describe el proceso mediante el cual los nuevos investigadores son incorporados y reconocidos como miembros de la comunidad académica. Implica la adquisición del lenguaje especializado, el aprendizaje de las prácticas del campo y la adopción de un marco compartido de entendimiento."},
+{"q":"¿Por qué las observaciones de los investigadores sociales no son consideradas 'puras' según el material de clases?",
+"opts":["Porque siempre están contaminadas por prejuicios personales inevitables","Porque responden al capital teórico-conceptual que la comunidad comparte y reproduce sistemáticamente","Porque los investigadores nunca pueden acceder directamente a la realidad social","Porque los datos se obtienen siempre de manera indirecta a través de intermediarios"],
+"ans":1,
+"tip":"Las observaciones de los investigadores están mediadas por el capital teórico-conceptual que la comunidad científica comparte y reproduce. Por esto, ninguna observación es completamente neutral: siempre está orientada desde un marco de referencia que el investigador ha incorporado como miembro de una comunidad académica."},
+{"q":"¿Qué implica la función orientadora de la comunidad académica?",
+"opts":["Garantizar que todos los miembros cumplan el reglamento ético de la institución","Facilitar únicamente la integración de nuevos investigadores al campo","Definir temas relevantes, lineamientos de revisión literaria y metodologías validadas por el campo","Coordinar la rendición de cuentas ante los organismos financiadores externos"],
+"ans":2,
+"tip":"La función orientadora refiere a la capacidad de la comunidad para definir qué temas son relevantes para investigar, establecer lineamientos para revisar la literatura científica, y validar las metodologías que orientan el trabajo del campo."},
+{"q":"¿Cuál es el propósito articulador del ciclo de interacción académica entre los miembros de una comunidad científica?",
+"opts":["Maximizar el número de publicaciones en revistas indexadas de alto impacto","Obtener financiamiento externo para proyectos de investigación competitivos","Ejercer dominio sobre un campo de estudio mediante la producción colectiva de conocimiento","Establecer alianzas formales con comunidades académicas de otros países"],
+"ans":2,
+"tip":"El ciclo de interacción académica —que incluye facilitar interacciones, dar sentido al trabajo científico, generar productos y ejercer dominio en el campo— tiene como propósito articulador que la comunidad ejerza un dominio legítimo sobre su campo de estudio a través de la producción sistemática de conocimiento."}
+],
+"tf":[
+{"q":"Las comunidades científicas pueden ser reguladas normativamente sin que eso contradiga la autonomía y la libertad de investigación de sus miembros.",
+"ans":true,
+"tip":"La regulación normativa es compatible con la autonomía investigativa. De hecho, los miembros de la comunidad participan voluntariamente en la definición y actualización de las reglas, lo que refleja un compromiso colectivo más que una imposición externa."},
+{"q":"El supuesto ontológico refiere a las creencias sobre cómo podemos conocer la realidad social.",
+"ans":false,
+"tip":"El supuesto ontológico responde a la pregunta '¿qué es la realidad social?', no a cómo la conocemos. Las creencias sobre cómo podemos acceder al conocimiento de la realidad corresponden al supuesto epistemológico."},
+{"q":"La función estabilizadora de la comunidad académica preserva la tradición y el compromiso histórico del campo a través del tiempo.",
+"ans":true,
+"tip":"La función estabilizadora mantiene la continuidad del campo al preservar sus tradiciones, compromisos históricos y valores fundacionales. Permite que la comunidad no pierda su identidad mientras se actualiza."},
+{"q":"Los aspectos teóricos y metodológicos de una investigación son independientes de los supuestos ontológicos y epistemológicos del investigador.",
+"ans":false,
+"tip":"Según el material, los supuestos ontológicos, epistemológicos y paradigmáticos fundamentan y articulan directamente los aspectos teóricos y metodológicos. No son elementos separados, sino niveles de un mismo edificio conceptual que se sostienen mutuamente."},
+{"q":"Todo investigador social opera desde una 'cosmovisión' o marco interpretativo que orienta su comprensión del mundo social.",
+"ans":true,
+"tip":"La comunidad científica comparte una cosmovisión del mundo que le permite interpretar e investigar la realidad social. Esto es inherente al trabajo científico: ningún investigador opera desde una posición de neutralidad absoluta."},
+{"q":"El ethos académico es simplemente un conjunto de reglas escritas que los investigadores deben seguir obligatoriamente.",
+"ans":false,
+"tip":"El ethos académico es mucho más que un reglamento escrito. Es la cultura, el espíritu y los valores compartidos que definen la identidad de la comunidad académica, incluyendo compromisos no formalizados como la honestidad intelectual y el rigor crítico."}
+],
+"frags":[
+{"t":"Un grupo de académicos establece los criterios metodológicos del campo, define cuáles son los temas de investigación prioritarios y orienta la revisión de la literatura científica relevante.",
+"ok":true,
+"tip":"Este fragmento ilustra claramente la función orientadora de la comunidad académica: define temas relevantes, establece lineamientos para la revisión de literatura y valida las metodologías del campo."},
+{"t":"Una investigadora novel asiste a seminarios de la disciplina, adopta progresivamente el vocabulario especializado y es reconocida como miembro de su comunidad de investigación.",
+"ok":true,
+"tip":"Este fragmento describe la función integradora: la inserción de nuevos miembros a la comunidad implica aprendizaje del lenguaje especializado, adopción de prácticas y reconocimiento colectivo como parte del grupo."},
+{"t":"El investigador declara explícitamente sus supuestos teóricos, pone a disposición pública los datos de su estudio y describe su procedimiento con suficiente detalle para que otros puedan replicarlo.",
+"ok":false,
+"tip":"Este fragmento describe la transparencia epistemológica, que es un componente de la accountability científica (Sección 2), no de las funciones o estructura de las comunidades académicas."},
+{"t":"La investigadora recoge entrevistas en profundidad con jóvenes de Temuco sobre su experiencia de discriminación en el sistema educativo público de la región.",
+"ok":false,
+"tip":"Este fragmento describe una técnica de recolección de evidencia empírica cualitativa (entrevistas en profundidad), que ilustra la característica de 'evidencia empírica abundante y con propósito' (Sección 5), no la producción del conocimiento en el nivel de los supuestos o funciones comunitarias."}
+]
+},
+
+// ╔═══════════════════════════════════════════════════════════╗
+// ║  SECCIÓN 2 — ACCOUNTABILITY CIENTÍFICA                   ║
+// ╚═══════════════════════════════════════════════════════════╝
+{
+"id":1,"num":2,
+"color":"#7a3b1e","bg":"#faf0e8","mid":"#9c5225",
+"title":"Accountability científica y ethos académico",
+"desc":"Las comunidades científicas están normativamente reguladas y sus miembros asumen compromisos de rendición de cuentas que articulan transparencia epistemológica, evaluación por pares, responsabilidad social, integridad académica y rendición institucional.",
+"words":["Transparencia","Pares","Integridad","Responsabilidad","Rendición","Plagio","Normas","Autonomía","Accountability","Ética"],
+"mc":[
+{"q":"¿Qué implica la transparencia epistemológica como componente de la accountability científica?",
+"opts":["Publicar los resultados únicamente en revistas de acceso abierto","Declarar los supuestos teóricos, metodológicos y éticos, y garantizar acceso abierto a los datos","Obtener el consentimiento informado de todos los participantes del estudio","Presentar los hallazgos de manera comprensible para el público no especializado"],
+"ans":1,
+"tip":"La transparencia epistemológica implica dos dimensiones: (1) declarar con claridad los supuestos teóricos, metodológicos y éticos que orientan la investigación, y (2) garantizar el acceso abierto a los datos, métodos y procesos de revisión para que la comunidad científica pueda evaluarlos."},
+{"q":"¿Qué mecanismo permite a la comunidad científica auto-regularse según el material de clases?",
+"opts":["El control del Estado a través de agencias reguladoras especializadas","Los rankings universitarios internacionales y los índices de impacto","La evaluación por pares entre investigadores del campo","La aprobación institucional previa de cada proyecto de investigación"],
+"ans":2,
+"tip":"La evaluación por pares (peer review) es el mecanismo central de auto-regulación de las comunidades científicas. Investigadores expertos en el campo evalúan críticamente los trabajos de sus colegas antes de su publicación o validación, sin necesidad de control externo."},
+{"q":"¿Qué implica la responsabilidad social del investigador según el material de clases?",
+"opts":["Solo publicar en revistas de acceso libre y sin fines de lucro","Financiar directamente proyectos de intervención comunitaria con sus recursos","Considerar el impacto en políticas públicas y comunicar hallazgos de manera accesible al público","Declarar públicamente su posición política e ideológica antes de investigar"],
+"ans":2,
+"tip":"La responsabilidad social de los investigadores incluye: (1) considerar el impacto de su trabajo en las políticas públicas, la equidad social y el medioambiente, y (2) comunicar sus hallazgos de manera comprensible al público general, no solo a la comunidad académica."},
+{"q":"¿Cuál de las siguientes conductas constituye una violación de la integridad académica?",
+"opts":["Replicar los resultados de otro estudio para confirmarlos con una nueva muestra","Citar fuentes de manera incompleta para agilizar la lectura de un texto académico","Manipular los datos de una encuesta para confirmar la hipótesis preestablecida","Usar métodos mixtos (cuantitativos y cualitativos) en un mismo estudio"],
+"ans":2,
+"tip":"La integridad académica involucra el rechazo al plagio, la manipulación de datos y la publicación engañosa. Manipular datos para confirmar hipótesis viola uno de los principios éticos centrales de la investigación, ya que compromete la veracidad de los resultados y engaña a la comunidad científica."},
+{"q":"¿Ante quiénes deben responder las universidades y centros de investigación según el componente de rendición de cuentas institucional?",
+"opts":["Exclusivamente ante las agencias de acreditación académica internacional","Solo ante las revistas científicas en las que publican sus investigadores","Ante financiadores, organismos públicos y ciudadanos por el uso de recursos y la relevancia de su producción","Únicamente ante sus propias autoridades y consejos académicos internos"],
+"ans":2,
+"tip":"La rendición de cuentas institucional implica que las universidades y centros de investigación respondan ante financiadores (como ANID/FONDECYT), organismos públicos y la ciudadanía en general, por el uso de los recursos asignados y la pertinencia social de su producción científica."},
+{"q":"¿Cuántos componentes clave de la accountability científica se identifican en el material de clases?",
+"opts":["Tres componentes básicos","Cuatro componentes interrelacionados","Cinco componentes clave","Seis principios fundamentales"],
+"ans":2,
+"tip":"El material de clases identifica cinco componentes de la accountability científica: (1) transparencia epistemológica, (2) evaluación por pares, (3) responsabilidad social, (4) integridad académica y (5) rendición de cuentas institucional."}
+],
+"tf":[
+{"q":"La regulación normativa de las comunidades científicas es compatible con la autonomía e independencia de los investigadores.",
+"ans":true,
+"tip":"Las comunidades científicas están normativamente reguladas y eso no contradice el ejercicio de la autonomía. De hecho, esta regulación refleja el compromiso y la voluntad de sus integrantes para cumplir y actualizar las reglas existentes, lo que es distinto a una imposición externa."},
+{"q":"La evaluación por pares es un mecanismo de control externo impuesto por el Estado o las agencias públicas a las comunidades científicas.",
+"ans":false,
+"tip":"La evaluación por pares es una forma de auto-regulación interna de las comunidades científicas: son los propios investigadores del campo quienes evalúan el trabajo de sus colegas. No es un control externo, sino un mecanismo de accountability que la propia comunidad administra."},
+{"q":"La transparencia epistemológica incluye garantizar el acceso abierto a los datos, métodos y procesos de revisión de una investigación.",
+"ans":true,
+"tip":"Sí, la transparencia epistemológica tiene dos dimensiones: declarar los supuestos teóricos, metodológicos y éticos, y garantizar el acceso abierto a los datos y métodos para que otros investigadores puedan evaluar y replicar el trabajo."},
+{"q":"El ethos académico queda definido únicamente por las reglas formales escritas en los reglamentos universitarios.",
+"ans":false,
+"tip":"El ethos académico es la cultura y el espíritu que define la identidad de la comunidad académica. Va mucho más allá de las reglas escritas: incluye valores compartidos, compromisos no formalizados, formas de relacionarse y un sentido de pertenencia a un colectivo con misión científica."},
+{"q":"La responsabilidad social del investigador incluye comunicar sus hallazgos de manera comprensible al público no especializado.",
+"ans":true,
+"tip":"Sí, la responsabilidad social de los científicos incluye el deber de comunicar sus hallazgos de manera accesible al público general. La ciencia no puede limitarse al diálogo entre especialistas si aspira a tener impacto social real."},
+{"q":"Copiar fragmentos de otro autor sin citar la fuente es aceptable si se hace con fines educativos o para ilustrar un punto teórico.",
+"ans":false,
+"tip":"El plagio es siempre una violación de la integridad académica, independientemente del propósito. La integridad académica exige rechazar el plagio, la manipulación de datos y cualquier forma de publicación engañosa, incluyendo el uso no atribuido de ideas ajenas."}
+],
+"frags":[
+{"t":"Antes de publicarse, el artículo fue evaluado por dos investigadoras expertas del campo que valoraron críticamente la metodología y los resultados sin conocer la identidad del autor.",
+"ok":true,
+"tip":"Este fragmento describe la evaluación por pares (peer review), que es el mecanismo central de auto-regulación de las comunidades científicas y un componente clave de la accountability científica."},
+{"t":"La investigadora declara explícitamente los supuestos teóricos que orientan su estudio, describe su método con detalle y pone a disposición pública la base de datos completa utilizada.",
+"ok":true,
+"tip":"Este fragmento ilustra la transparencia epistemológica: declarar los supuestos que guían la investigación y garantizar el acceso abierto a los datos y métodos son las dos dimensiones de este componente de la accountability científica."},
+{"t":"El investigador formula hipótesis derivadas de la teoría de Bourdieu sobre capital social y las somete a prueba mediante datos estadísticos de la encuesta CASEN.",
+"ok":false,
+"tip":"Este fragmento describe el vínculo directo con la teoría social (deducción desde un marco teórico), que corresponde a la 'conexión con la teoría social' (Sección 4), no a la accountability científica."},
+{"t":"El equipo de investigación selecciona una muestra representativa de 800 personas y diseña un cuestionario validado para medir actitudes hacia la migración en la región.",
+"ok":false,
+"tip":"Este fragmento describe decisiones del diseño de investigación orientadas a garantizar la representatividad de la evidencia empírica, lo que corresponde a la característica de 'evidencia empírica abundante y con propósito' (Sección 5)."}
+]
+},
+
+// ╔═══════════════════════════════════════════════════════════╗
+// ║  SECCIÓN 3 — RELEVANCIA SOCIAL DEL FENÓMENO             ║
+// ╚═══════════════════════════════════════════════════════════╝
+{
+"id":2,"num":3,
+"color":"#1e3a5f","bg":"#ebf3fb","mid":"#2E6099",
+"title":"Relevancia social del fenómeno",
+"desc":"Los investigadores se ocupan de fenómenos generales, excepcionales o históricamente significativos que trascienden el caso particular y dicen algo sobre procesos sociales más amplios.",
+"words":["Generalidad","Excepcionalidad","Historia","Relevancia","Población","Tendencias","Fenómeno","Impacto","Colectividad","Objeto"],
+"mc":[
+{"q":"¿Cuál de las siguientes NO es una fuente de relevancia social según Ragin?",
+"opts":["Generalidad del fenómeno","Excepcionalidad del caso","Importancia histórica","Popularidad mediática del tema"],
+"ans":3},
+{"q":"Un investigador estudia una organización con estructura completamente horizontal donde nadie ejerce autoridad formal. ¿Qué fuente de relevancia justifica principalmente este estudio?",
+"opts":["Generalidad","Excepcionalidad","Importancia histórica","Covariación"],
+"ans":1},
+{"q":"Según Ragin, ¿cuál es la pregunta central que orienta la selección de un objeto de investigación social?",
+"opts":["¿Este tema es popular en los medios de comunicación?","¿Este fenómeno me interesa personalmente?","¿Qué nos dice este fenómeno sobre algo más grande que él mismo?","¿Puedo recoger suficientes datos en el tiempo disponible?"],
+"ans":2},
+{"q":"¿En qué se diferencia un objeto de investigación social de un tema de agenda mediática?",
+"opts":["El objeto debe ser un tema reciente y novedoso para la disciplina","El objeto conecta con procesos estructurales que trascienden el caso particular","El tema mediático siempre es más relevante socialmente","No hay diferencia real entre ambos tipos de selección"],
+"ans":1},
+{"q":"Según Ragin, la 'vida social' se comprende mejor como:",
+"opts":["Un Estado-nación con fronteras geográficas definidas","Personas que hacen cosas con los demás","Un conjunto de leyes e instituciones formales","Una comunidad unida por cultura e idioma compartidos"],
+"ans":1},
+{"q":"¿Qué incluye la categoría 'personas que hacen cosas con los demás' según Ragin?",
+"opts":["Solo las acciones colectivas voluntarias y conscientes","Únicamente los grandes eventos históricos documentados","También a las personas que se niegan a hacer cosas con los demás","Solo las actividades económicas y políticas formales"],
+"ans":2}
+],
+"tf":[
+{"q":"Solo los fenómenos frecuentes y comunes merecen ser objeto de investigación social.","ans":false},
+{"q":"La importancia histórica de un fenómeno puede ser una fuente de relevancia social para la investigación.","ans":true},
+{"q":"Un fenómeno puede carecer de visibilidad mediática y ser de enorme importancia para la investigación social.","ans":true},
+{"q":"La relevancia social de un fenómeno depende principalmente del interés personal del investigador.","ans":false},
+{"q":"Los investigadores trabajan con tasas e índices porque permiten hablar de poblaciones, no solo de individuos aislados.","ans":true},
+{"q":"Un hecho puede ser noticia sin ser socialmente relevante en el sentido que Ragin propone.","ans":true}
+],
+"frags":[
+{"t":"La investigadora estudia la segregación habitacional porque afecta a millones de personas en las principales ciudades del país y refleja procesos estructurales de desigualdad.","ok":true},
+{"t":"El estudio sobre una organización igualitaria es relevante porque desafía los supuestos habituales sobre la necesidad de jerarquía en las instituciones.","ok":true},
+{"t":"El investigador formula hipótesis derivadas de las teorías de Marx y Weber sobre la conciencia de clase y la acción social.","ok":false},
+{"t":"Se diseña una muestra aleatoria de 1.000 votantes con criterios explícitos de representatividad para estudiar el comportamiento electoral.","ok":false}
+]
+},
+
+// ╔═══════════════════════════════════════════════════════════╗
+// ║  SECCIÓN 4 — CONEXIÓN CON LA TEORÍA SOCIAL              ║
+// ╚═══════════════════════════════════════════════════════════╝
+{
+"id":3,"num":4,
+"color":"#1a5c38","bg":"#ebf7ef","mid":"#217A4A",
+"title":"Conexión con la teoría social",
+"desc":"Las representaciones sociocientíficas siempre se vinculan con la teoría social, sea directamente —comprobando o refinando teorías— o indirectamente —con implicaciones teóricas que nutren conversaciones académicas existentes.",
+"words":["Teoría","Hipótesis","Deducción","Inducción","Conceptos","Diálogo","Paradigma","Marco teórico","Conversación","Explicación"],
+"mc":[
+{"q":"¿Cómo describe Ragin a la teoría social?",
+"opts":["Leyes científicas universales e inmutables validadas por consenso","Conversaciones continuas sobre ideas abstractas entre científicos sociales","Un método específico para recolectar datos empíricos en el campo","Un listado de hechos verificados sobre el comportamiento humano"],
+"ans":1},
+{"q":"¿De qué manera DIRECTA puede una investigación vincularse con la teoría social?",
+"opts":["Describiendo en detalle eventos históricos relevantes para el campo","Comprobando, refinando o refutando una teoría existente mediante hipótesis","Publicando en revistas académicas indexadas en Scopus o WoS","Trabajando con grandes volúmenes de datos estadísticos representativos"],
+"ans":1},
+{"q":"Según Ragin, ¿cómo difiere el investigador del periodista al estudiar un mismo fenómeno?",
+"opts":["El periodista usa más fuentes que el investigador social","El investigador compara el caso con otros e inscribe sus hallazgos en teorías del campo","El periodista realiza análisis más sistemáticos de la evidencia disponible","No hay diferencia relevante entre ambos enfoques analíticos"],
+"ans":1},
+{"q":"¿Qué es una hipótesis según el texto de Ragin?",
+"opts":["Un resultado definitivo y verificado de la investigación social","Una conjetura razonada sobre lo que el investigador espera encontrar","Un método de recolección de datos cualitativos en profundidad","Una técnica estadística para el análisis de datos cuantitativos"],
+"ans":1},
+{"q":"¿Qué relación tienen la deducción y la inducción en el método científico según Ragin?",
+"opts":["Son procesos opuestos que no pueden combinarse en ninguna investigación","La deducción reemplaza a la inducción en la investigación social moderna","Actúan conjuntamente: la deducción aplica teoría a evidencias y la inducción refina ideas desde evidencias","Solo la deducción es válida en la investigación científica rigurosa"],
+"ans":2},
+{"q":"¿Cuándo una investigación se vincula INDIRECTAMENTE con la teoría social?",
+"opts":["Cuando el investigador ignora deliberadamente la teoría existente en el campo","Cuando los hallazgos tienen implicaciones teóricas aunque el estudio no se planteó como prueba de una teoría","Cuando se publican resultados en revistas no especializadas de divulgación","Cuando se trabaja exclusivamente con datos cuantitativos de grandes muestras"],
+"ans":1}
+],
+"tf":[
+{"q":"Las conversaciones teóricas en ciencias sociales comenzaron antes de que los investigadores actuales nacieran y continuarán después de su retiro.","ans":true},
+{"q":"Una investigación solo se vincula con la teoría si explícitamente declara que pretende comprobarla.","ans":false},
+{"q":"La teoría social guía la investigación al proporcionar un marco para formular hipótesis sobre los fenómenos.","ans":true},
+{"q":"El periodismo y la investigación social tienen la misma relación con la teoría social.","ans":false},
+{"q":"La deducción consiste en partir de pruebas empíricas y evaluar sus consecuencias para las ideas abstractas.","ans":false},
+{"q":"Las teorías sociales abordan preguntas sobre características y procesos básicos de la vida social.","ans":true}
+],
+"frags":[
+{"t":"El estudio conecta sus hallazgos con los debates de Bourdieu sobre capital cultural e investigaciones previas sobre desigualdad educativa en Chile.","ok":true},
+{"t":"La investigadora formula una hipótesis basada en las teorías de Weber sobre burocracia y poder para orientar su estudio sobre organizaciones.","ok":true},
+{"t":"El investigador codifica sistemáticamente 150 horas de entrevistas e identifica patrones comunes en todos los testimonios recogidos.","ok":false},
+{"t":"La investigación se centra en este fenómeno porque afecta a millones de personas en las principales ciudades del país.","ok":false}
+]
+},
+
+// ╔═══════════════════════════════════════════════════════════╗
+// ║  SECCIÓN 5 — EVIDENCIA EMPÍRICA ABUNDANTE Y CON         ║
+// ║              PROPÓSITO                                    ║
+// ╚═══════════════════════════════════════════════════════════╝
+{
+"id":4,"num":5,
+"color":"#7b3f00","bg":"#fef5eb","mid":"#9C5200",
+"title":"Evidencia empírica abundante y con propósito",
+"desc":"Los investigadores recolectan grandes cantidades de pruebas empíricas mediante un diseño sistemático que determina qué información recoger, cómo hacerlo, a quiénes y en qué momento, con criterios explícitos.",
+"words":["Diseño","Muestreo","Recolección","Representatividad","Sesgo","Técnica","Propósito","Validez","Datos","Encuesta"],
+"mc":[
+{"q":"¿Qué es un diseño de investigación según Ragin?",
+"opts":["Un plan para presentar los resultados al público general de manera atractiva","Un plan para recoger y analizar pruebas empíricas que permita responder las preguntas planteadas","Una técnica estadística específica para analizar datos cuantitativos","Un listado de hipótesis a comprobar durante el estudio"],
+"ans":1},
+{"q":"¿Por qué un estudio sobre condiciones de vida de personas en situación de calle mediante encuestas telefónicas puede tener problemas de representatividad?",
+"opts":["Las encuestas telefónicas son poco confiables en términos generales","Muchas personas en situación de calle no pueden permitirse tener teléfono","Las personas en situación de calle no suelen responder encuestas voluntariamente","El muestreo telefónico siempre es demasiado costoso para este tipo de estudios"],
+"ans":1},
+{"q":"¿Qué distingue principalmente a la investigación social del periodismo en cuanto a la evidencia empírica?",
+"opts":["La cantidad total de información que se maneja durante el proceso","La explicitación del procedimiento de recolección y sus limitaciones metodológicas","El tipo de fenómeno social que se decide estudiar en cada caso","El tiempo total dedicado a la recolección de información de campo"],
+"ans":1},
+{"q":"¿Cuál de las siguientes es una decisión crítica del diseño de investigación?",
+"opts":["El título del informe final o artículo de investigación","La audiencia a la que irá dirigida la publicación de resultados","La técnica de recolección de datos a utilizar","El número de páginas del informe final de investigación"],
+"ans":2},
+{"q":"¿Qué es el muestreo en la investigación social según Ragin?",
+"opts":["La técnica de entrevistar a todas las personas de la población objetivo","Una estrategia para escoger selectivamente un subconjunto representativo de los datos disponibles","El proceso de analizar estadísticamente los datos ya recolectados","La presentación final de los resultados al público general"],
+"ans":1},
+{"q":"¿Por qué la recolección de pruebas empíricas es necesariamente selectiva según Ragin?",
+"opts":["Porque los investigadores no tienen tiempo suficiente para recoger todo","Porque potencialmente existe una cantidad infinita de pruebas empíricas posibles","Porque solo los datos cuantitativos son válidos para la investigación social","Porque el presupuesto de investigación siempre es limitado e insuficiente"],
+"ans":1}
+],
+"tf":[
+{"q":"En la investigación social, la evidencia empírica se recoge de manera aleatoria y sin un plan previo definido.","ans":false},
+{"q":"El sesgo en la selección de la muestra es una preocupación central del diseño de investigación social.","ans":true},
+{"q":"Los investigadores reconocen que la naturaleza de los datos restringe las preguntas que pueden plantear a partir de ellos.","ans":true},
+{"q":"Una muestra aleatoria de 1.000 votantes puede ser suficiente para estudiar tendencias electorales generales.","ans":true},
+{"q":"La explicitación del procedimiento de recolección de datos es irrelevante para la calidad de la investigación social.","ans":false},
+{"q":"El momento en que se realiza la recolección de datos no tiene mayor importancia para la validez del estudio.","ans":false}
+],
+"frags":[
+{"t":"El investigador define un período preciso (2020–2024), selecciona los medios con criterios explícitos y recoge todas las noticias publicadas sobre el conflicto en ese período.","ok":true},
+{"t":"Se diseña una muestra aleatoria estratificada de 1.000 votantes con criterios explícitos de representatividad regional para estudiar tendencias de participación electoral.","ok":true},
+{"t":"El estudio conecta sus hallazgos con los debates de Bourdieu sobre capital cultural y el papel de la escuela en la reproducción de la desigualdad educativa.","ok":false},
+{"t":"El investigador aplica análisis de framing al conjunto completo de las noticias, identificando patrones sistemáticos de encuadre en la cobertura del conflicto.","ok":false}
+]
+},
+
+// ╔═══════════════════════════════════════════════════════════╗
+// ║  SECCIÓN 6 — ANÁLISIS SISTEMÁTICO DE LA EVIDENCIA       ║
+// ╚═══════════════════════════════════════════════════════════╝
+{
+"id":5,"num":6,
+"color":"#4a1a6b","bg":"#f5eef8","mid":"#6B2B9A",
+"title":"Análisis sistemático de la evidencia",
+"desc":"Los investigadores sociales aplican procedimientos analíticos explícitos y comunicables al conjunto completo de la evidencia, ya sean estadísticos o cualitativos interpretativos, y declaran abiertamente sus conclusiones.",
+"words":["Análisis","Sistematicidad","Codificación","Estadística","Interpretación","Correlación","Covariación","Procedimiento","Rigor","Conclusiones"],
+"mc":[
+{"q":"¿Qué significa que el análisis sociocientífico sea sistemático?",
+"opts":["Que sigue los mismos pasos independientemente del tema estudiado","Que el procedimiento es explícito, aplicable al conjunto de la evidencia y comunicable a otros investigadores","Que siempre utiliza métodos estadísticos cuantitativos avanzados","Que el investigador trabaja de forma individual y muy ordenada"],
+"ans":1},
+{"q":"¿Qué critica Ragin de los documentales en comparación con la investigación social?",
+"opts":["Que presentan demasiada evidencia sin seleccionar adecuadamente","Que muchos evitan realizar interpretaciones de las pruebas, dejando que el espectador extraiga conclusiones propias","Que no se ocupan de fenómenos socialmente relevantes para el campo","Que no tienen audiencia científica que los evalúe críticamente"],
+"ans":1},
+{"q":"¿Cuál es la diferencia entre el análisis periodístico y el análisis sociocientífico según Ragin?",
+"opts":["El periodismo siempre usa más fuentes que la investigación social","La investigación social aplica procedimientos sistemáticos al conjunto completo de la evidencia","El periodismo siempre produce conclusiones más precisas y verificables","No hay diferencia relevante en el tipo de análisis que ambos realizan"],
+"ans":1},
+{"q":"¿Cuándo se utilizarían métodos cualitativos de análisis en lugar de estadísticos en una investigación?",
+"opts":["Cuando el investigador no tiene formación en estadística avanzada","Cuando se trabaja con material de entrevistas o documentos que requieren interpretación en profundidad","Cuando el tamaño de la muestra es demasiado grande para analizar cuantitativamente","Cuando el tema de investigación es políticamente sensible o controversial"],
+"ans":1},
+{"q":"¿Qué es una correlación según Ragin?",
+"opts":["Una prueba definitiva de causalidad entre dos variables sociales","Un cálculo que describe la consistencia de un patrón de covariación entre variables","Una técnica exclusiva de la investigación cualitativa e interpretativa","El resultado final de cualquier investigación social cuantitativa"],
+"ans":1},
+{"q":"Según Ragin, ¿qué ocurre cuando dos variables covarían en un estudio?",
+"opts":["Necesariamente una es la causa de la otra en la vida social","Se confirma la hipótesis del investigador sin necesidad de más evidencia","Existe un patrón de correspondencia que puede ofrecerse como evidencia de una posible conexión causal","El estudio ha concluido satisfactoriamente y puede publicarse"],
+"ans":2}
+],
+"tf":[
+{"q":"El análisis sistemático implica aplicar el procedimiento analítico solo a los fragmentos más interesantes de la evidencia.","ans":false},
+{"q":"Un investigador debe poder describir su procedimiento analítico con suficiente detalle para que otros investigadores puedan evaluarlo.","ans":true},
+{"q":"Los métodos estadísticos son los únicos válidos para el análisis en la investigación social.","ans":false},
+{"q":"La investigación social declara abiertamente las conclusiones que extrae de la evidencia analizada.","ans":true},
+{"q":"Según Ragin, una representación periodística podría simplemente contar las historias de los casos más interesantes sin análisis sistemático.","ans":true},
+{"q":"El análisis sistemático es optativo en la investigación social si el investigador tiene suficiente experiencia acumulada.","ans":false}
+],
+"frags":[
+{"t":"El investigador aplica análisis de framing al conjunto completo de las noticias del período, identificando patrones sistemáticos en el lenguaje y los encuadres utilizados por cada medio.","ok":true},
+{"t":"El investigador codifica sistemáticamente 150 horas de entrevistas grabadas e identifica patrones comunes en todos los testimonios recogidos, siguiendo un protocolo explícito.","ok":true},
+{"t":"La investigadora estudia el fenómeno porque desafía los supuestos habituales sobre la necesidad de jerarquía en las organizaciones modernas.","ok":false},
+{"t":"El investigador define un período de análisis de 5 años y selecciona los medios con criterios explícitos de representatividad para construir el corpus de análisis.","ok":false}
+]
+}
+
+]; // fin CHARS
+
+// ─── PUNTAJE ────────────────────────────────────────────────────────────────
+function scSec(an,ch){
+  let mc=0,tf=0,fr=0;
+  (an.mc||[]).forEach((a,i)=>{if(i<ch.mc.length&&a===ch.mc[i].ans)mc++;});
+  (an.tf||[]).forEach((a,i)=>{if(i<ch.tf.length&&a===ch.tf[i].ans)tf++;});
+  (an.frag||[]).forEach((a,i)=>{if(i<ch.frags.length&&a===ch.frags[i].ok)fr++;});
+  return{mc,tf,fr,t:mc+tf+fr,mmc:ch.mc.length,mtf:ch.tf.length,mfr:ch.frags.length,max:ch.mc.length+ch.tf.length+ch.frags.length};
+}
+function scTot(an){let t=0,m=0;CHARS.forEach((c,i)=>{const s=scSec(an[i]||{},c);t+=s.t;m+=s.max;});return{t,m,pct:m>0?Math.round(t/m*100):0};}
+
+// ─── ESTADO ─────────────────────────────────────────────────────────────────
+const mkAns=()=>({0:{mc:[],tf:[],frag:[],words:[]},1:{mc:[],tf:[],frag:[],words:[]},2:{mc:[],tf:[],frag:[],words:[]},3:{mc:[],tf:[],frag:[],words:[]},4:{mc:[],tf:[],frag:[],words:[]},5:{mc:[],tf:[],frag:[],words:[]}});
+let S={view:"home",grp:null,si:0,ans:mkAns(),dgs:[],dsi:0,rsi:0,exp:15,unwatch:null,regMode:"grupo"};
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+function pbar(p,col){return`<div class="pbar"><div class="pfill" style="width:${p}%;background:${col||"#0f2142"}"></div></div>`;}
+function wcloud(words,sel,col,fn){
+  const sz=[32,28,26,24,22,22,20,20,18,16];
+  return words.map((w,i)=>{const s=(sel||[]).includes(w);return`<span class="wchip${s?" ws":""}" onclick="${fn}('${w}')" style="font-size:${sz[i]}px${s?`;background:${col};border-color:${col}`:""}"><b style="font-weight:${s?500:400}">${w}</b></span>`;}).join("");
+}
+function brow(p){const c=p>=70?"#1a5c38":p>=40?"#7b3f00":"#9b2226";return`<div style="height:6px;background:var(--bg3);border-radius:3px;margin-top:3px"><div style="height:6px;width:${p}%;background:${c};border-radius:3px"></div></div>`;}
+function pctColor(p){return p>=70?"#1a5c38":p>=40?"#7b3f00":"#9b2226";}
+function pctBg(p){return p>=70?"#ebf7ef":p>=40?"#fef9e7":"#fff5f5";}
+
+// ─── VISTA: HOME ─────────────────────────────────────────────────────────────
+function vHome(){
+  const totalPts=CHARS.reduce((s,c)=>s+c.mc.length+c.tf.length+c.frags.length,0);
+  return`
+<div>
+  <!-- ══ HERO ══ -->
+  <div class="hero">
+    <div style="position:relative;z-index:1">
+      <!-- Institution badge -->
+      <div class="hero-badge">
+        <i class="ti ti-school" style="font-size:13px;color:#c9a256"></i>
+        <span>Universidad de La Frontera · Temuco, Chile</span>
+      </div>
+
+      <!-- Overline + title -->
+      <p class="hero-kicker">Actividad interactiva · Bachillerato en Ciencias Sociales</p>
+      <h1 class="hero-title">Producción del conocimiento, comunidades científicas y representaciones sociocientíficas</h1>
+      <p class="hero-sub">Basada en Ragin (2007) <em>La construcción de la investigación social</em> y material del curso.<br>${CHARS.length} secciones temáticas &nbsp;·&nbsp; ${totalPts} puntos en total</p>
+
+      <!-- Section pills -->
+      <div class="hero-pills">
+        ${CHARS.map(c=>`<span class="hero-pill" style="background:${c.color}35;border:.5px solid ${c.color}60"><span style="width:7px;height:7px;border-radius:50%;background:${c.color};display:inline-block;flex-shrink:0"></span>C${c.num}. ${c.title.split(" ").slice(0,3).join(" ")}…</span>`).join("")}
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CONTENT ══ -->
+  <div class="inner">
+
+    <!-- Firebase warning -->
+    ${!FB_OK?`<div class="info-box" style="margin-top:1.25rem"><p style="font-weight:600;color:#92400e;margin-bottom:.25rem"><i class="ti ti-alert-triangle" style="vertical-align:-2px"></i> Modo local activo</p><p style="font-size:13px;color:#92400e">Sin Firebase configurado, los datos se guardan solo en este dispositivo. Ver instrucciones en el bloque de código para activar el seguimiento compartido.</p></div>`:`<div style="height:1.25rem"></div>`}
+
+    <!-- How it works -->
+    <div style="margin-bottom:1.25rem">
+      <p style="font-size:11px;font-weight:700;color:var(--text2);letter-spacing:.07em;text-transform:uppercase;margin-bottom:.75rem">¿Cómo funciona?</p>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;text-align:center">
+        ${[
+          ["ti-edit","Responde","6 SM + 6 VF + 4 fragmentos por sección"],
+          ["ti-send","Envía","Todas las secciones deben completarse"],
+          ["ti-eye","Revisa","Chequea correctas e incorrectas con retroalimentación"]
+        ].map(([ic,t,d])=>`<div style="background:var(--bg2);border-radius:10px;padding:.85rem .6rem">
+          <i class="ti ${ic}" style="font-size:22px;color:var(--navy);display:block;margin:0 auto .4rem"></i>
+          <p style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:.2rem">${t}</p>
+          <p style="font-size:11px;line-height:1.4">${d}</p></div>`).join("")}
+      </div>
+    </div>
+
+    <!-- Section overview -->
+    <div style="margin-bottom:1.25rem">
+      <p style="font-size:11px;font-weight:700;color:var(--text2);letter-spacing:.07em;text-transform:uppercase;margin-bottom:.75rem">Contenidos de la actividad</p>
+      <div class="sec-grid">
+        ${CHARS.map(c=>`
+        <div class="sec-card" style="border-color:${c.color}35;background:${c.bg}">
+          <div style="display:flex;align-items:flex-start;gap:.5rem">
+            <div class="sec-num" style="background:${c.color}">${c.num}</div>
+            <div>
+              <p class="sec-title" style="color:${c.color}">${c.title}</p>
+              <p class="sec-meta" style="color:${c.color}99">${c.mc.length} SM · ${c.tf.length} VF · ${c.frags.length} Fragmentos · ${c.mc.length+c.tf.length+c.frags.length} pts</p>
+            </div>
+          </div>
+        </div>`).join("")}
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-grid">
+      <button class="cta-card" style="background:var(--navy);color:#fff"
+        onclick="goReg()"
+        onmouseover="this.style.background='#162d4a'"
+        onmouseout="this.style.background='var(--navy)'">
+        <i class="ti ti-arrow-right-circle" style="font-size:30px;color:#c9a256"></i>
+        <div>
+          <p style="font-weight:700;font-size:14px;color:#fff;margin:0">Iniciar actividad</p>
+          <p style="font-size:12px;opacity:.65;margin:0;color:#fff">Individual o grupal</p>
+        </div>
+      </button>
+      <button class="cta-card" style="background:var(--bg);border:.5px solid var(--bdr2)"
+        onclick="goPin()"
+        onmouseover="this.style.background='var(--bg2)'"
+        onmouseout="this.style.background='var(--bg)'">
+        <i class="ti ti-chart-bar" style="font-size:30px;color:#4a1a6b"></i>
+        <div>
+          <p style="font-weight:700;font-size:14px;color:var(--text);margin:0">Panel docente</p>
+          <p style="font-size:12px;color:var(--text2);margin:0">Requiere PIN</p>
+        </div>
+      </button>
+    </div>
+
+    <!-- Footer info -->
+    <div style="text-align:center;padding:.5rem 0 .5rem;border-top:.5px solid var(--bdr)">
+      <p style="font-size:11px;color:var(--text3)">Introducción a la Investigación Social · Bachillerato en Ciencias Sociales · UFRO</p>
+    </div>
+  </div>
+</div>`;
+}
+
+// ─── VISTA: REGISTRO ─────────────────────────────────────────────────────────
+function vReg(){const m=S.regMode;return`<div class="inner" style="padding-top:1.25rem">
+<button class="btn" onclick="goHome()" style="margin-bottom:1.25rem"><i class="ti ti-arrow-left"></i> Volver</button>
+<h2>Registro de participantes</h2>
+<p style="margin-bottom:1.25rem">Completen los datos antes de comenzar la actividad.</p>
+<div class="card">
+<div style="margin-bottom:1.25rem">
+<label style="font-size:13px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px">Modalidad de trabajo *</label>
+<div class="radio-row">
+<label><input type="radio" name="md" value="individual" ${m==="individual"?"checked":""} onchange="S.regMode='individual';render()"> Individual</label>
+<label><input type="radio" name="md" value="grupo" ${m==="grupo"?"checked":""} onchange="S.regMode='grupo';render()"> Grupo (2 a 4 integrantes)</label>
+</div></div>
+${m==="individual"
+  ?`<div style="margin-bottom:1.25rem"><label style="font-size:13px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px">Tu nombre completo *</label><input type="text" id="gn" placeholder="Nombre y apellido"></div>`
+  :`<div style="margin-bottom:1rem"><label style="font-size:13px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px">Nombre del grupo *</label><input type="text" id="gn" placeholder="Ej: Grupo 1 · Los investigadores…"></div>
+<div style="margin-bottom:1.25rem"><label style="font-size:13px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px">Integrantes (2 a 4 personas) *</label>
+${[0,1,2,3].map(i=>`<div style="display:flex;gap:8px;margin-bottom:8px;align-items:center"><span style="font-size:13px;color:var(--text2);min-width:18px">${i+1}.</span><input type="text" id="m${i}" placeholder="${i<2?"Nombre y apellido (requerido)":"Nombre y apellido (opcional)"}"></div>`).join("")}</div>`}
+<button class="btn btn-p" onclick="startAct()" style="width:100%;justify-content:center"><i class="ti ti-arrow-right"></i> Comenzar actividad</button>
+<p id="re" style="color:var(--danger);font-size:12px;margin-top:8px;display:none"></p>
+</div></div>`;}
+
+// ─── VISTA: SECCIÓN ───────────────────────────────────────────────────────────
+function vSec(){
+  const ci=S.si,ch=CHARS[ci],an=S.ans[ci];
+  const pct=Math.round(ci/CHARS.length*100);
+  return`<div>
+<div style="padding:.75rem 1.25rem .25rem">
+<div style="display:flex;justify-content:space-between;margin-bottom:.4rem">
+<span style="font-size:12px;color:var(--text2)">Sección ${ci+1} de ${CHARS.length}</span>
+<span style="font-size:12px;color:var(--text2)"><strong style="color:var(--text)">${S.grp.name}</strong>${S.grp.mode==="grupo"&&S.grp.members?.length?" · "+S.grp.members.length+" integrantes":""}</span></div>
+${pbar(pct,ch.color)}
+<div style="display:flex;gap:.35rem;margin-bottom:1rem;flex-wrap:wrap">
+${CHARS.map((c,i)=>`<span style="padding:5px 10px;border-radius:20px;font-size:11px;background:${i===ci?c.color:i<ci?c.color+"22":"var(--bg2)"};color:${i===ci?"#fff":i<ci?c.color:"var(--text2)"}">${i<ci?"✓ ":""}C${c.num}</span>`).join("")}</div>
+</div>
+
+<div style="background:${ch.bg};padding:1rem 1.25rem;margin-bottom:.75rem;border-left:4px solid ${ch.color}">
+<p style="font-size:11px;font-weight:700;color:${ch.color};margin-bottom:3px;text-transform:uppercase;letter-spacing:.06em">Característica ${ch.num}</p>
+<h2 style="color:${ch.color};margin-bottom:.4rem">${ch.title}</h2>
+<p style="font-size:13px;color:${ch.color}bb">${ch.desc}</p></div>
+
+<div class="inner">
+
+<div class="card">
+<h3><i class="ti ti-cloud" style="font-size:15px;vertical-align:-2px;margin-right:6px"></i>Nube de conceptos clave</h3>
+<p style="font-size:13px;margin-bottom:1rem">Seleccionen hasta 3 conceptos que consideren más centrales para esta característica.</p>
+<div id="wc" style="text-align:center;padding:.5rem 0">${wcloud(ch.words,an.words,ch.color,"tw")}</div>
+<p id="wcc" style="font-size:11px;color:var(--text2);text-align:center;margin-top:.5rem">${(an.words||[]).length}/3 seleccionados</p></div>
+
+<div class="card">
+<h3><i class="ti ti-list-check" style="font-size:15px;vertical-align:-2px;margin-right:6px"></i>Selección múltiple <span style="font-weight:400;font-size:13px;color:var(--text2)">(${ch.mc.length} preguntas)</span></h3>
+<p style="font-size:13px;margin-bottom:1rem">Seleccionen la alternativa correcta para cada pregunta.</p>
+${ch.mc.map((q,qi)=>`<div style="margin-bottom:1.25rem;${qi<ch.mc.length-1?"padding-bottom:1.25rem;border-bottom:.5px solid var(--bdr)":""}">
+<p style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:.75rem">${qi+1}. ${q.q}</p>
+${q.opts.map((o,oi)=>`<button class="opt${(an.mc||[])[qi]===oi?" sel":""}" onclick="sMC(${ci},${qi},${oi})">${String.fromCharCode(65+oi)}. ${o}</button>`).join("")}</div>`).join("")}</div>
+
+<div class="card">
+<h3><i class="ti ti-toggle-right" style="font-size:15px;vertical-align:-2px;margin-right:6px"></i>Verdadero o falso <span style="font-weight:400;font-size:13px;color:var(--text2)">(${ch.tf.length} preguntas)</span></h3>
+<p style="font-size:13px;margin-bottom:1rem">Indiquen si cada afirmación es verdadera o falsa según el material de clases.</p>
+${ch.tf.map((q,qi)=>`<div style="margin-bottom:.75rem;padding:.75rem;background:var(--bg2);border-radius:var(--r)">
+<p style="font-size:13px;color:var(--text);margin-bottom:.75rem">${qi+1}. ${q.q}</p>
+<button class="tfb${(an.tf||[])[qi]===true?" vs":""}" onclick="sTF(${ci},${qi},true)"><i class="ti ti-check"></i> Verdadero</button>
+<button class="tfb${(an.tf||[])[qi]===false?" fs":""}" onclick="sTF(${ci},${qi},false)"><i class="ti ti-x"></i> Falso</button></div>`).join("")}</div>
+
+<div class="card">
+<h3><i class="ti ti-cards" style="font-size:15px;vertical-align:-2px;margin-right:6px"></i>Clasificación de fragmentos <span style="font-weight:400;font-size:13px;color:var(--text2)">(${ch.frags.length} fragmentos)</span></h3>
+<p style="font-size:13px;margin-bottom:1rem">¿Cada fragmento ilustra la característica <strong style="color:${ch.color}">${ch.title}</strong>?</p>
+${ch.frags.map((f,fi)=>`<div style="margin-bottom:.75rem;padding:.75rem;border:.5px solid var(--bdr);border-radius:var(--r)">
+<p style="font-size:13px;font-style:italic;color:var(--text);margin-bottom:.75rem;padding-left:.75rem;border-left:3px solid ${ch.color}">"${f.t}"</p>
+<button class="tfb${(an.frag||[])[fi]===true?" vs":""}" onclick="sFR(${ci},${fi},true)"><i class="ti ti-check"></i> Sí ilustra C${ch.num}</button>
+<button class="tfb${(an.frag||[])[fi]===false?" fs":""}" onclick="sFR(${ci},${fi},false)"><i class="ti ti-x"></i> No ilustra C${ch.num}</button></div>`).join("")}</div>
+
+<div style="display:flex;justify-content:space-between;margin-top:.5rem;flex-wrap:wrap;gap:.5rem">
+${ci>0?`<button class="btn" onclick="prev()"><i class="ti ti-arrow-left"></i> Anterior</button>`:"<span></span>"}
+${ci<CHARS.length-1
+  ?`<button class="btn btn-p" onclick="nxt()">Siguiente <i class="ti ti-arrow-right"></i></button>`
+  :`<button class="btn btn-g" onclick="sub()"><i class="ti ti-send"></i> Enviar actividad</button>`}
+</div>
+<p id="ne" style="color:var(--danger);font-size:12px;margin-top:8px;text-align:right;display:none"></p>
+</div></div>`;}
+
+// ─── VISTA: COMPLETADO ────────────────────────────────────────────────────────
+function vDone(){
+  const s=scTot(S.ans);
+  const medal=s.pct>=85?"🏅":s.pct>=70?"⭐":"📚";
+  return`<div class="inner" style="padding-top:2rem;text-align:center">
+<div style="width:72px;height:72px;background:#ebf7ef;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem">
+<i class="ti ti-circle-check" style="font-size:36px;color:#1a5c38"></i></div>
+<h1 style="margin-bottom:.25rem">¡Actividad completada! ${medal}</h1>
+<p style="margin-bottom:1.5rem;font-size:15px">${S.grp.mode==="individual"?"Estudiante:":"Grupo:"} <strong style="color:var(--text)">${S.grp.name}</strong></p>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;max-width:300px;margin:0 auto 1.5rem">
+<div class="metric"><div class="mlabel">Puntaje total</div><div class="mval" style="font-family:var(--ff-d)">${s.t}/${s.m}</div></div>
+<div class="metric"><div class="mlabel">Porcentaje</div><div class="mval" style="font-family:var(--ff-d);color:${pctColor(s.pct)}">${s.pct}%</div></div></div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;max-width:500px;margin:0 auto 1.5rem;text-align:left">
+${CHARS.map((c,i)=>{const ss=scSec(S.ans[i]||{},c);const p=Math.round(ss.t/ss.max*100);return`<div style="background:${c.bg};border-radius:10px;padding:.75rem;border-left:3px solid ${c.color}"><p style="font-size:10px;font-weight:700;color:${c.color};margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">C${c.num}: ${c.title.split(" ").slice(0,3).join(" ")}…</p><p style="font-size:16px;font-weight:600;color:var(--text);font-family:var(--ff-d)">${ss.t}/${ss.max} <span style="font-size:12px;font-weight:400;color:${pctColor(p)}">(${p}%)</span></p></div>`;}).join("")}</div>
+
+<p style="font-size:13px;margin-bottom:1.5rem">Tus respuestas han sido registradas exitosamente. Ahora puedes revisar cada sección con retroalimentación.</p>
+
+<div style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap">
+<button class="btn btn-g" onclick="goReview()"><i class="ti ti-eye"></i> Revisar mis respuestas</button>
+<button class="btn" onclick="goHome()"><i class="ti ti-home"></i> Volver al inicio</button>
+</div></div>`;}
+
+// ─── VISTA: REVISIÓN CON RETROALIMENTACIÓN ───────────────────────────────────
+function vReview(){
+  const ci=S.rsi,ch=CHARS[ci],an=S.ans[ci];
+  const ss=scSec(an,ch),totS=scTot(S.ans);
+  const secPct=Math.round(ss.t/ss.max*100);
+
+  return`<div>
+<div class="inner" style="padding-top:1.25rem">
+<div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem">
+<button class="btn" onclick="S.view='done';render();window.scrollTo(0,0)"><i class="ti ti-arrow-left"></i> Volver</button>
+<div><h2 style="margin-bottom:0">Revisión de respuestas</h2>
+<p style="font-size:12px">${S.grp.mode==="individual"?"Estudiante:":"Grupo:"} <strong>${S.grp.name}</strong> &nbsp;·&nbsp; Total: ${totS.t}/${totS.m} (${totS.pct}%)</p></div></div>
+
+<!-- Section tabs -->
+<div style="display:flex;gap:.35rem;margin-bottom:1.25rem;flex-wrap:wrap">
+${CHARS.map((c,i)=>{const s2=scSec(S.ans[i]||{},c);const p2=Math.round(s2.t/s2.max*100);
+return`<button onclick="S.rsi=${i};render();window.scrollTo(0,0)" style="padding:6px 12px;border-radius:20px;font-size:12px;border:.5px solid;cursor:pointer;font-family:var(--ff);line-height:1.3;background:${i===ci?c.color:"var(--bg2)"};color:${i===ci?"#fff":"var(--text2)"};border-color:${i===ci?c.color:"var(--bdr)"}">C${c.num} <span style="opacity:.85">${s2.t}/${s2.max}</span></button>`;}).join("")}</div>
+
+<!-- Section header -->
+<div style="background:${ch.bg};border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.25rem;border-left:4px solid ${ch.color}">
+<p style="font-size:10px;font-weight:700;color:${ch.color};margin-bottom:2px;text-transform:uppercase;letter-spacing:.07em">Característica ${ch.num}</p>
+<h2 style="color:${ch.color};margin-bottom:.35rem">${ch.title}</h2>
+<p style="font-size:13px;margin-bottom:.65rem;color:${ch.color}bb">${ch.desc}</p>
+<div style="display:inline-flex;gap:.75rem;background:${pctBg(secPct)};border-radius:6px;padding:.4rem .75rem;border:.5px solid ${pctColor(secPct)}40;flex-wrap:wrap">
+<span style="font-size:12px;color:${pctColor(secPct)}">SM: <strong>${ss.mc}/${ss.mmc}</strong></span>
+<span style="font-size:12px;color:${pctColor(secPct)}">VF: <strong>${ss.tf}/${ss.mtf}</strong></span>
+<span style="font-size:12px;color:${pctColor(secPct)}">Frag: <strong>${ss.fr}/${ss.mfr}</strong></span>
+<span style="font-size:12px;font-weight:700;color:${pctColor(secPct)}">Total: ${ss.t}/${ss.max} (${secPct}%)</span>
+</div></div>
+</div>
+
+<!-- ── SM Review ── -->
+<div class="inner">
+<div class="card">
+<h3 style="margin-bottom:1rem"><i class="ti ti-list-check" style="font-size:15px;vertical-align:-2px;margin-right:6px"></i>Selección múltiple &nbsp;<span style="font-weight:400;font-size:13px;color:var(--text2)">${ss.mc} correctas de ${ss.mmc}</span></h3>
+${ch.mc.map((q,qi)=>{
+  const chosen=(an.mc||[])[qi];
+  const correct=q.ans;
+  const isRight=chosen===correct;
+  return`<div style="margin-bottom:1rem;padding:1rem;border-radius:10px;background:${isRight?"#ebf7ef":"#fff5f5"};border:.5px solid ${isRight?"#1a5c38":"#b91c1c"}">
+<div style="display:flex;align-items:flex-start;gap:.75rem;margin-bottom:.75rem">
+<span style="flex-shrink:0;width:22px;height:22px;margin-top:1px;border-radius:50%;background:${isRight?"#1a5c38":"#b91c1c"};display:inline-flex;align-items:center;justify-content:center">
+<i class="ti ${isRight?"ti-check":"ti-x"}" style="font-size:12px;color:#fff"></i></span>
+<p style="font-size:14px;font-weight:600;color:var(--text)">${qi+1}. ${q.q}</p></div>
+${q.opts.map((o,oi)=>{
+  const isChosen=chosen===oi,isCorr=correct===oi;
+  let bg="var(--bg)",bdr="var(--bdr)",col="var(--text2)",fw=400,tag="";
+  if(isCorr){bg="#d1fae5";bdr="#1a5c38";col="#1a5c38";fw=600;tag=`<i class="ti ti-check" style="margin-left:auto;color:#1a5c38;flex-shrink:0"></i>`;}
+  if(isChosen&&!isCorr){bg="#fee2e2";bdr="#b91c1c";col="#9b2226";fw=600;tag=`<i class="ti ti-x" style="margin-left:auto;color:#b91c1c;flex-shrink:0"></i>`;}
+  return`<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;margin:4px 0;border-radius:6px;border:.5px solid ${bdr};background:${bg};font-size:13px;color:${col};font-weight:${fw}">${String.fromCharCode(65+oi)}. ${o}${tag}</div>`;
+}).join("")}
+${!isRight&&chosen!==undefined?`<p style="font-size:12px;color:#1a5c38;margin-top:.5rem;padding-left:30px"><i class="ti ti-bulb" style="vertical-align:-2px"></i> Correcta: <strong>${String.fromCharCode(65+correct)}. ${q.opts[correct]}</strong></p>`:""}
+${chosen===undefined?`<p style="font-size:12px;color:var(--text3);margin-top:.5rem;padding-left:30px">Sin respuesta.</p>`:""}
+${!isRight&&q.tip?`<div class="feedback-box"><i class="ti ti-info-circle" style="font-size:15px;flex-shrink:0"></i><span><strong>Retroalimentación:</strong> ${q.tip}</span></div>`:""}
+</div>`;}).join("")}</div>
+
+<!-- ── TF Review ── -->
+<div class="card">
+<h3 style="margin-bottom:1rem"><i class="ti ti-toggle-right" style="font-size:15px;vertical-align:-2px;margin-right:6px"></i>Verdadero o falso &nbsp;<span style="font-weight:400;font-size:13px;color:var(--text2)">${ss.tf} correctas de ${ss.mtf}</span></h3>
+${ch.tf.map((q,qi)=>{
+  const chosen=(an.tf||[])[qi];
+  const correct=q.ans;
+  const isRight=chosen===correct;
+  return`<div style="padding:.85rem 1rem;border-radius:10px;margin-bottom:.75rem;background:${isRight?"#ebf7ef":"#fff5f5"};border:.5px solid ${isRight?"#1a5c38":"#b91c1c"}">
+<div style="display:flex;align-items:flex-start;gap:.75rem;margin-bottom:.6rem">
+<span style="flex-shrink:0;width:20px;height:20px;margin-top:1px;border-radius:50%;background:${isRight?"#1a5c38":"#b91c1c"};display:inline-flex;align-items:center;justify-content:center">
+<i class="ti ${isRight?"ti-check":"ti-x"}" style="font-size:11px;color:#fff"></i></span>
+<p style="font-size:13px;color:var(--text)">${qi+1}. ${q.q}</p></div>
+<div style="display:flex;gap:.5rem;flex-wrap:wrap;padding-left:28px;margin-bottom:${!isRight&&q.tip?".5rem":"0"}">
+${[true,false].map(v=>{
+  const isChosen=chosen===v,isCorr=correct===v;
+  let bg="var(--bg2)",bdr="var(--bdr)",col="var(--text2)",fw=400;
+  if(isCorr){bg="#d1fae5";bdr="#1a5c38";col="#1a5c38";fw=700;}
+  if(isChosen&&!isCorr){bg="#fee2e2";bdr="#b91c1c";col="#9b2226";fw=700;}
+  return`<span style="padding:5px 14px;border-radius:6px;border:.5px solid ${bdr};background:${bg};font-size:12px;color:${col};font-weight:${fw};display:inline-flex;align-items:center;gap:4px">
+<i class="ti ${v?"ti-check":"ti-x"}"></i>${v?"Verdadero":"Falso"}${isCorr?" ✓":""}</span>`;}).join("")}
+${chosen===undefined?`<span style="font-size:12px;color:var(--text3)">Sin respuesta.</span>`:""}
+</div>
+${!isRight&&q.tip?`<div class="feedback-box" style="margin-left:28px"><i class="ti ti-info-circle" style="font-size:15px;flex-shrink:0"></i><span><strong>Retroalimentación:</strong> ${q.tip}</span></div>`:""}
+</div>`;}).join("")}</div>
+
+<!-- ── Frags Review ── -->
+<div class="card">
+<h3 style="margin-bottom:1rem"><i class="ti ti-cards" style="font-size:15px;vertical-align:-2px;margin-right:6px"></i>Clasificación de fragmentos &nbsp;<span style="font-weight:400;font-size:13px;color:var(--text2)">${ss.fr} correctas de ${ss.mfr}</span></h3>
+${ch.frags.map((f,fi)=>{
+  const chosen=(an.frag||[])[fi];
+  const correct=f.ok;
+  const isRight=chosen===correct;
+  return`<div style="padding:.85rem 1rem;border-radius:10px;margin-bottom:.75rem;border:.5px solid ${isRight?"#1a5c38":"#b91c1c"};background:${isRight?"#ebf7ef":"#fff5f5"}">
+<div style="display:flex;align-items:flex-start;gap:.75rem;margin-bottom:.75rem">
+<span style="flex-shrink:0;width:20px;height:20px;margin-top:1px;border-radius:50%;background:${isRight?"#1a5c38":"#b91c1c"};display:inline-flex;align-items:center;justify-content:center">
+<i class="ti ${isRight?"ti-check":"ti-x"}" style="font-size:11px;color:#fff"></i></span>
+<p style="font-size:13px;font-style:italic;color:var(--text);border-left:3px solid ${ch.color};padding-left:.75rem">"${f.t}"</p></div>
+<div style="padding-left:28px;font-size:13px">
+<span style="color:${isRight?"#1a5c38":"#b91c1c"};font-weight:600">Tu respuesta: ${chosen===true?"Sí ilustra":"No ilustra"} C${ch.num}</span>
+${!isRight?` &nbsp;·&nbsp; <span style="color:#1a5c38;font-weight:600">Correcta: ${correct===true?"Sí ilustra":"No ilustra"} C${ch.num}</span>`:""}
+${chosen===undefined?`<span style="color:var(--text3)">Sin respuesta.</span>`:""}
+</div>
+${f.tip?`<div class="feedback-box" style="margin-top:.6rem;margin-left:28px"><i class="ti ti-info-circle" style="font-size:15px;flex-shrink:0"></i><span><strong>${isRight?"¿Por qué es correcto?":"¿Por qué es incorrecto?"}</strong> ${f.tip}</span></div>`:""}
+</div>`;}).join("")}</div>
+
+<!-- Nav -->
+<div style="display:flex;justify-content:space-between;margin-top:.5rem;flex-wrap:wrap;gap:.5rem">
+${ci>0?`<button class="btn" onclick="S.rsi=${ci-1};render();window.scrollTo(0,0)"><i class="ti ti-arrow-left"></i> C${CHARS[ci-1].num} anterior</button>`:`<span></span>`}
+${ci<CHARS.length-1
+  ?`<button class="btn btn-p" onclick="S.rsi=${ci+1};render();window.scrollTo(0,0)">C${CHARS[ci+1].num} siguiente <i class="ti ti-arrow-right"></i></button>`
+  :`<button class="btn btn-g" onclick="S.view='done';render();window.scrollTo(0,0)"><i class="ti ti-circle-check"></i> Ver resumen final</button>`}
+</div></div></div>`;}
+
+// ─── VISTA: PIN ───────────────────────────────────────────────────────────────
+function vPin(){return`<div style="max-width:300px;margin:3rem auto;text-align:center">
+<div style="width:52px;height:52px;background:#f5eef8;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem">
+<i class="ti ti-lock" style="font-size:26px;color:#4a1a6b"></i></div>
+<h2 style="margin-bottom:.5rem">Panel del docente</h2>
+<p style="margin-bottom:1.25rem">Ingrese el PIN de acceso para ver el seguimiento</p>
+<input type="password" id="pi" placeholder="PIN" style="text-align:center;font-size:18px;letter-spacing:.15em;margin-bottom:.75rem" onkeydown="if(event.key==='Enter')chkPin()">
+<button class="btn btn-p" onclick="chkPin()" style="width:100%;justify-content:center;margin-top:.25rem"><i class="ti ti-login"></i> Ingresar</button>
+<p id="pe" style="color:var(--danger);font-size:12px;margin-top:.75rem;display:none">PIN incorrecto.</p>
+<button class="btn" onclick="goHome()" style="width:100%;justify-content:center;margin-top:.5rem"><i class="ti ti-arrow-left"></i> Volver</button></div>`;}
+
+// ─── VISTA: DASHBOARD ─────────────────────────────────────────────────────────
+function vDash(){
+  const gs=S.dgs,done=gs.filter(g=>g.completed).length,tot=S.exp,pct=tot>0?Math.round(done/tot*100):0;
+  const ci=S.dsi,ch=CHARS[ci];
+  const mcp=ch.mc.map((_,qi)=>{const c=gs.filter(g=>g.completed&&(g.answers[ci]?.mc||[])[qi]===ch.mc[qi].ans).length;return done>0?Math.round(c/done*100):0;});
+  const tfp=ch.tf.map((_,qi)=>{const c=gs.filter(g=>g.completed&&(g.answers[ci]?.tf||[])[qi]===ch.tf[qi].ans).length;return done>0?Math.round(c/done*100):0;});
+  const frp=ch.frags.map((_,qi)=>{const c=gs.filter(g=>g.completed&&(g.answers[ci]?.frag||[])[qi]===ch.frags[qi].ok).length;return done>0?Math.round(c/done*100):0;});
+  const wf={};ch.words.forEach(w=>wf[w]=0);
+  gs.filter(g=>g.completed).forEach(g=>{((g.answers[ci]?.words)||[]).forEach(w=>{if(wf[w]!==undefined)wf[w]++;});});
+  const mxf=Math.max(1,...Object.values(wf));
+  return`<div class="inner" style="padding-top:1.25rem">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:.5rem">
+<div style="display:flex;align-items:center;gap:.75rem">
+<button class="btn" onclick="goHome()"><i class="ti ti-arrow-left"></i></button>
+<div><h2 style="margin-bottom:0">Panel del docente</h2><p style="font-size:12px">IIS · BCS · UFRO · Seguimiento en tiempo real</p></div></div>
+<div style="display:flex;gap:8px">
+<button class="btn" onclick="refDash()"><i class="ti ti-refresh"></i> Actualizar</button>
+<button class="btn btn-p" onclick="expCSV()"><i class="ti ti-download"></i> CSV</button></div></div>
+
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-bottom:1rem">
+<div class="metric"><div class="mlabel">Completados</div><div class="mval" style="color:#1a5c38">${done}</div></div>
+<div class="metric"><div class="mlabel">Esperados <span onclick="edTot()" style="cursor:pointer;font-size:11px;color:var(--text2)" title="Editar">✎</span></div><div class="mval">${tot}</div></div>
+<div class="metric"><div class="mlabel">Progreso</div><div class="mval">${pct}%</div></div></div>
+${pbar(pct,"#0f2142")}
+<div style="display:flex;gap:5px;margin-bottom:1.25rem;flex-wrap:wrap">
+${CHARS.map((c,i)=>`<button onclick="S.dsi=${i};render()" style="padding:6px 12px;border-radius:20px;font-size:12px;border:.5px solid;cursor:pointer;font-family:var(--ff);background:${i===ci?c.color:"var(--bg2)"};color:${i===ci?"#fff":"var(--text2)"};border-color:${i===ci?c.color:"var(--bdr)"}">C${c.num}. ${c.title.split(" ").slice(0,2).join(" ")}</button>`).join("")}</div>
+<div style="background:${ch.bg};border-radius:8px;padding:.75rem 1rem;margin-bottom:1.25rem;border-left:3px solid ${ch.color}"><p style="font-size:13px;font-weight:600;color:${ch.color}">C${ch.num}: ${ch.title}</p></div>
+
+<div class="card">
+<h3><i class="ti ti-cloud" style="font-size:15px;vertical-align:-2px;margin-right:6px"></i>Nube de conceptos — selecciones agregadas (n=${done})</h3>
+<div style="text-align:center;padding:.75rem 0;display:flex;flex-wrap:wrap;justify-content:center;gap:8px">
+${ch.words.map(w=>{const f=wf[w]||0,sz=14+Math.round(f/mxf*18),op=f===0?.2:.45+(f/mxf*.55);return`<span style="font-size:${sz}px;padding:5px 14px;border-radius:20px;background:${ch.color};opacity:${op};color:#fff;display:inline-flex;align-items:center;gap:6px">${w}<span style="font-size:${Math.max(10,sz-6)}px;background:rgba(255,255,255,.9);color:${ch.color};padding:1px 5px;border-radius:8px;font-weight:600">${f}</span></span>`;}).join("")}
+</div>${done===0?'<p style="font-size:12px;text-align:center;margin-top:.5rem">Sin datos aún.</p>':""}</div>
+
+<div class="card">
+<h3><i class="ti ti-chart-bar" style="font-size:15px;vertical-align:-2px;margin-right:6px"></i>Aciertos por pregunta (n=${done})</h3>
+<p style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:.5rem;margin-top:.25rem">Selección múltiple</p>
+${ch.mc.map((q,i)=>`<div style="margin-bottom:.6rem"><div style="display:flex;justify-content:space-between"><span style="font-size:12px;color:var(--text2);max-width:83%">P${i+1}: ${q.q.substring(0,62)}${q.q.length>62?"…":""}</span><span style="font-size:12px;font-weight:600;color:${mcp[i]>=70?"#1a5c38":mcp[i]>=40?"#7b3f00":"#9b2226"}">${mcp[i]}%</span></div>${brow(mcp[i])}</div>`).join("")}
+<div style="border-top:.5px solid var(--bdr);padding-top:.75rem;margin:.75rem 0"></div>
+<p style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:.5rem">Verdadero o falso</p>
+${ch.tf.map((q,i)=>`<div style="margin-bottom:.6rem"><div style="display:flex;justify-content:space-between"><span style="font-size:12px;color:var(--text2);max-width:83%">VF${i+1}: ${q.q.substring(0,62)}${q.q.length>62?"…":""}</span><span style="font-size:12px;font-weight:600;color:${tfp[i]>=70?"#1a5c38":tfp[i]>=40?"#7b3f00":"#9b2226"}">${tfp[i]}%</span></div>${brow(tfp[i])}</div>`).join("")}
+<div style="border-top:.5px solid var(--bdr);padding-top:.75rem;margin:.75rem 0"></div>
+<p style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:.5rem">Clasificación de fragmentos</p>
+${ch.frags.map((f,i)=>`<div style="margin-bottom:.6rem"><div style="display:flex;justify-content:space-between"><span style="font-size:12px;color:var(--text2);font-style:italic;max-width:83%">"${f.t.substring(0,58)}…"</span><span style="font-size:12px;font-weight:600;color:${frp[i]>=70?"#1a5c38":frp[i]>=40?"#7b3f00":"#9b2226"}">${frp[i]}%</span></div>${brow(frp[i])}</div>`).join("")}</div>
+
+<div class="card">
+<h3 style="margin-bottom:1rem"><i class="ti ti-users" style="font-size:15px;vertical-align:-2px;margin-right:6px"></i>Participantes registrados (${gs.length} total)</h3>
+${gs.length===0?'<p style="font-size:13px">Nadie ha ingresado aún.</p>':""}
+${gs.map(g=>{const s=g.completed?scTot(g.answers):null,ss=g.completed?scSec(g.answers[ci]||{},ch):null;return`<div style="padding:.75rem;border:.5px solid var(--bdr);border-radius:8px;margin-bottom:.5rem">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.5rem">
+<div><p style="font-size:14px;font-weight:600;color:var(--text)">${g.name}</p>
+<p style="font-size:12px">${g.mode==="individual"?"Individual":`Grupo · ${(g.members||[]).filter(Boolean).join(" · ")}`}</p></div>
+<div style="display:flex;align-items:center;gap:.75rem">
+${g.completed?`<span style="background:#ebf7ef;color:#1a5c38;padding:3px 9px;border-radius:4px;font-size:11px;font-weight:600">✓ Listo</span><span style="font-size:13px;font-weight:600;color:var(--text)">${s.t}/${s.m} (${s.pct}%)</span>`:`<span style="background:var(--bg2);color:var(--text2);padding:3px 9px;border-radius:4px;font-size:11px">En progreso</span>`}</div></div>
+${g.completed&&ss?`<div style="margin-top:.5rem;padding-top:.5rem;border-top:.5px solid var(--bdr)"><p style="font-size:11px;color:var(--text2)">C${ch.num} — SM: ${ss.mc}/${ss.mmc} · VF: ${ss.tf}/${ss.mtf} · Frag: ${ss.fr}/${ss.mfr} · <strong>Total: ${ss.t}/${ss.max}</strong></p>${g.answers[ci]?.words?.length?`<p style="font-size:11px;color:var(--text2);margin-top:2px">Palabras: ${g.answers[ci].words.join(", ")}</p>`:""}</div>`:""}</div>`;}).join("")}
+</div></div>`;}
+
+// ─── RENDER ───────────────────────────────────────────────────────────────────
+function render(){
+  const a=document.getElementById("app");
+  if(!a)return;
+  if(S.view==="home")a.innerHTML=vHome();
+  else if(S.view==="reg")a.innerHTML=vReg();
+  else if(S.view==="sec")a.innerHTML=vSec();
+  else if(S.view==="done")a.innerHTML=vDone();
+  else if(S.view==="review")a.innerHTML=vReview();
+  else if(S.view==="pin")a.innerHTML=vPin();
+  else if(S.view==="dash")a.innerHTML=vDash();
+}
+
+// ─── ACCIONES ─────────────────────────────────────────────────────────────────
+function goReview(){S.rsi=0;S.view="review";render();window.scrollTo(0,0);}
+function goHome(){if(S.unwatch){S.unwatch();S.unwatch=null;}S.view="home";render();}
+function goReg(){S.grp=null;S.ans=mkAns();S.si=0;S.view="reg";render();}
+function goPin(){S.view="pin";render();}
+
+function startAct(){
+  const nm=document.getElementById("gn")?.value?.trim()||"";
+  const err=document.getElementById("re");
+  if(!nm){if(err){err.textContent="Ingrese un nombre.";err.style.display="block";}return;}
+  let ms=[];
+  if(S.regMode==="grupo"){
+    ms=[0,1,2,3].map(i=>document.getElementById("m"+i)?.value?.trim()||"").filter(Boolean);
+    if(ms.length<2){if(err){err.textContent="Ingrese al menos 2 integrantes.";err.style.display="block";}return;}
+  }
+  S.grp={id:Date.now()+"_"+Math.random().toString(36).substr(2,5),name:nm,mode:S.regMode,members:ms,startedAt:new Date().toISOString(),completed:false,answers:S.ans};
+  S.si=0;S.view="sec";saveGrp(S.grp);render();window.scrollTo(0,0);
+}
+function sMC(ci,qi,oi){if(!S.ans[ci].mc)S.ans[ci].mc=[];S.ans[ci].mc[qi]=oi;if(S.grp){S.grp.answers=S.ans;saveGrp(S.grp);}render();}
+function sTF(ci,qi,v){if(!S.ans[ci].tf)S.ans[ci].tf=[];S.ans[ci].tf[qi]=v;if(S.grp){S.grp.answers=S.ans;saveGrp(S.grp);}render();}
+function sFR(ci,fi,v){if(!S.ans[ci].frag)S.ans[ci].frag=[];S.ans[ci].frag[fi]=v;if(S.grp){S.grp.answers=S.ans;saveGrp(S.grp);}render();}
+function tw(w){
+  const ci=S.si;
+  if(!S.ans[ci].words)S.ans[ci].words=[];
+  const idx=S.ans[ci].words.indexOf(w);
+  if(idx>=0)S.ans[ci].words.splice(idx,1);
+  else if(S.ans[ci].words.length<3)S.ans[ci].words.push(w);
+  if(S.grp){S.grp.answers=S.ans;saveGrp(S.grp);}
+  const wc=document.getElementById("wc"),wcc=document.getElementById("wcc");
+  if(wc)wc.innerHTML=wcloud(CHARS[ci].words,S.ans[ci].words,CHARS[ci].color,"tw");
+  if(wcc)wcc.textContent=`${S.ans[ci].words.length}/3 seleccionados`;
+}
+function chkAns(ci){
+  const an=S.ans[ci],ch=CHARS[ci];
+  const d=((an.mc||[]).filter(a=>a!==undefined).length)+((an.tf||[]).filter(a=>a!==undefined).length)+((an.frag||[]).filter(a=>a!==undefined).length);
+  return{d,t:ch.mc.length+ch.tf.length+ch.frags.length};
+}
+function prev(){if(S.si>0){S.si--;render();window.scrollTo(0,0);}}
+function nxt(){
+  const{d,t}=chkAns(S.si);
+  const err=document.getElementById("ne");
+  if(d<t){if(err){err.textContent=`Faltan ${t-d} respuesta(s) por completar en esta sección.`;err.style.display="block";}return;}
+  if(err)err.style.display="none";
+  S.si++;render();window.scrollTo(0,0);
+}
+async function sub(){
+  const{d,t}=chkAns(S.si);
+  const err=document.getElementById("ne");
+  if(d<t){if(err){err.textContent=`Faltan ${t-d} respuesta(s).`;err.style.display="block";}return;}
+  S.grp.completed=true;S.grp.answers=S.ans;S.grp.completedAt=new Date().toISOString();
+  await saveGrp(S.grp);S.view="done";render();window.scrollTo(0,0);
+}
+function chkPin(){
+  const v=document.getElementById("pi")?.value||"";
+  if(v===PIN){ldDash();}else{const e=document.getElementById("pe");if(e)e.style.display="block";}
+}
+async function ldDash(){
+  S.dgs=await loadGrps();S.view="dash";render();
+  if(DB){S.unwatch=watchGrps(gs=>{S.dgs=gs;if(S.view==="dash")render();});}
+}
+async function refDash(){S.dgs=await loadGrps();render();}
+function edTot(){
+  const v=prompt("Número total de participantes/grupos esperados:",S.exp);
+  if(v&&!isNaN(parseInt(v))){S.exp=parseInt(v);render();}
+}
+function expCSV(){
+  const gs=S.dgs.filter(g=>g.completed);
+  if(!gs.length){alert("No hay participantes completados para exportar.");return;}
+  const h=["Nombre","Modalidad","Integrantes","Completado","Puntaje total","Porcentaje",
+    ...CHARS.map(c=>[`C${c.num} SM (/${c.mc.length})`,`C${c.num} VF (/${c.tf.length})`,`C${c.num} Frag (/${c.frags.length})`,`C${c.num} Total (/${c.mc.length+c.tf.length+c.frags.length})`]).flat(),
+    ...CHARS.map(c=>`C${c.num} Palabras`)];
+  const rows=gs.map(g=>{
+    const s=scTot(g.answers),ss=CHARS.map((c,i)=>scSec(g.answers[i]||{},c));
+    return[`"${g.name}"`,g.mode==="individual"?"Individual":"Grupo",`"${(g.members||[]).join(", ")}"`,
+      g.completedAt?new Date(g.completedAt).toLocaleString("es-CL"):"",s.t,s.pct+"%",
+      ...ss.map(x=>[x.mc,x.tf,x.fr,x.t]).flat(),
+      ...CHARS.map((c,i)=>`"${(g.answers[i]?.words||[]).join(", ")}"`)].join(",");
+  });
+  const csv=[h.join(","),...rows].join("\n");
+  const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");a.href=url;a.download=`iis_bcs_${new Date().toISOString().split("T")[0]}.csv`;
+  a.click();URL.revokeObjectURL(url);
+}
+
+render();
+</script>
+</body>
+</html>
